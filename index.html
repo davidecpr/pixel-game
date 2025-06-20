@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Minecraft‐style Map Game</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<!-- Menu iniziale -->
+<section id="menu-screen-section">
+  <div id="menu-screen">
+    <h1>Minecraft Map Game</h1>
+      <nav>
+      <button id="btn-editor" class="btn btn-primary">Apri Configuratore</button>
+      <button id="btn-play" class="btn btn-primary">Gioca</button>
+    </nav>
+  </div>
+</section>
+
+<!-- Editor -->
+<section id="editor-screen-section" class="hidden">
+  <div id="editor-screen">
+    <div id="editor-sidebar">
+        <h2>Palette</h2>
+        <div id="palette"></div>
+        <hr>
+        <button id="save-map" class="btn btn-primary">Salva Mappa</button>
+        <label for="load-map" class="btn btn-secondary">Carica da File</label>
+        <input type="file" id="load-map" accept=".json" class="hidden">
+        <button id="clear-map" class="btn btn-secondary">Pulisci</button>
+        <button id="back-menu-1" class="btn btn-secondary">Indietro</button>
+    </div>
+    <canvas id="editor-canvas"></canvas>
+  </div>
+</section>
+
+<!-- Play -->
+<section id="play-screen-section" class="hidden">
+    <!-- Contenitore per selezione mappa (rimane invariato ma ora è separato dal play-screen) -->
+    <div id="map-selection-container">
+      <h2>Scegli una Mappa</h2>
+      <div id="map-list-container">
+        <!-- L'elenco delle mappe verrà popolato da JS -->
+        <p>Nessuna mappa trovata. Crea una mappa nell'editor!</p>
+      </div>
+      <button id="btn-start-game" class="btn btn-primary" disabled>Avvia Gioco</button>
+      <button id="back-menu-2" class="btn btn-secondary">Torna al Menu</button>
+    </div>
+
+    <!-- Nuovo contenitore per la schermata di gioco -->
+    <div id="play-screen" class="hidden">
+        <div id="game-area">
+            <canvas id="game-canvas"></canvas>
+            <div id="game-overlay" class="hidden">
+                <p id="overlay-message"></p>
+                <button id="restart-game-btn" class="btn">Ricomincia</button>
+            </div>
+        </div>
+        <div id="command-panel">
+            <h2>Comandi</h2>
+            <div id="command-sequence-list">
+                <!-- La sequenza di comandi apparirà qui -->
+            </div>
+            <div class="command-buttons">
+                <button data-cmd="avanti" class="btn">Avanti</button>
+                <button data-cmd="sinistra" class="btn">Gira Sinistra</button>
+                <button data-cmd="destra" class="btn">Gira Destra</button>
+            </div>
+            <hr>
+            <div class="execution-buttons">
+                <button id="run-sequence" class="btn btn-primary">Esegui</button>
+                <button id="clear-sequence" class="btn btn-secondary">Pulisci</button>
+            </div>
+            <button id="back-menu-from-game" class="btn btn-secondary">Torna al Menu</button>
+        </div>
+    </div>
+</section>
+
+<!-- Definizione assetList condivisa -->
+<script>
+    window.assetList = [
+        { key: 'G', name: 'Prato',  url: 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.6/assets/minecraft/textures/block/green_concrete_powder.png' },
+        { key: 'T', name: 'Albero', url: 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.6/assets/minecraft/textures/block/azalea_plant.png' },
+        { key: 'W', name: 'Acqua',  url: 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.6/assets/minecraft/textures/block/warped_wart_block.png' },
+        { key: 'X', name: 'Trofeo', url: 'https://raw.githubusercontent.com/CodeMouse92/no-monster-minecraft/main/img/nether_star.png' }
+    ];
+</script>
+
+<script src="js/game.js"></script>
+<script src="js/editor.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
