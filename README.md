@@ -1,4 +1,4 @@
-# Minecraft-style Map Game
+# Pixel Map Game
 
 ## Struttura
 - `index.html` – entry point con menu, editor e gioco

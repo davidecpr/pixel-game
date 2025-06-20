@@ -1,20 +1,21 @@
-// js/game.js
-const game = (() => { // Aggiungo l'assegnazione a game
+// js/game.js - Versione rifattorizzata con controllo diretto tramite frecce
+const game = (() => {
+    // Elementi DOM
     const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
-    const gameOverlay = document.getElementById('game-overlay'); // Rinominato da overlay
-    const overlayMessage = document.getElementById('overlay-message'); // Rinominato da msg
-
-    let currentMapData = null; // Conterrà { name, rows, cols, mapData: gridData }
-    let player = { x: 0, y: 0, dir: 0 }; // dir: 0=su, 1=dx, 2=giu, 3=sx
+    const gameOverlay = document.getElementById('game-overlay');
+    const overlayMessage = document.getElementById('overlay-message');
+    const restartGameBtn = document.getElementById('restart-game-btn');
+    const backMenuButton = document.getElementById('back-menu-from-game');
+    
+    // Stato di gioco
+    let currentMapData = null;
+    let player = { x: 0, y: 0, direction: 0 }; // direction: 0=su, 1=destra, 2=giù, 3=sinistra
     let trophy = { x: 0, y: 0 };
     let CELL_SIZE = 20; // Valore di default, sarà ricalcolato
     let gameWon = false;
     let gameLost = false;
-
-    let commandQueue = [];
-    let isSequenceRunning = false;
-
+    
     // Carica immagini asset e player
     const assets = {};
     window.assetList.forEach(a => {
@@ -23,321 +24,352 @@ const game = (() => { // Aggiungo l'assegnazione a game
         assets[a.key] = img;
     });
     const playerImg = new Image();
-    playerImg.src = 'https://raw.githubusercontent.com/mineatar-io/skin-render/main/steve.png';
+    playerImg.src = 'https://art.pixilart.com/sr2b2528d58f1aws3.png';
 
+    // Gestore degli eventi per i tasti freccia
+    function handleKeydown(e) {
+        if (gameWon || gameLost) return;
+        
+        console.log('Tasto premuto:', e.key);
+        console.log('Direzione attuale:', player.direction);
+        console.log('Posizione attuale:', player.x, player.y);
+        
+        // Evita lo scrolling della pagina con i tasti freccia
+        if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) {
+            e.preventDefault();
+        }
+        
+        switch(e.key) {
+            case "ArrowLeft":
+                // Ruota a sinistra
+                player.direction = (player.direction + 3) % 4; // +3 mod 4 equivale a -1 mod 4
+                console.log('Rotazione a sinistra, nuova direzione:', player.direction);
+                drawGame(); // Ridisegna per mostrare la rotazione
+                break;
+            case "ArrowRight":
+                // Ruota a destra
+                player.direction = (player.direction + 1) % 4;
+                console.log('Rotazione a destra, nuova direzione:', player.direction);
+                drawGame(); // Ridisegna per mostrare la rotazione
+                break;
+            case "ArrowUp":
+                // Muovi in avanti nella direzione attuale
+                console.log('Movimento in avanti, direzione:', player.direction);
+                switch(player.direction) {
+                    case 0: 
+                        console.log('Movimento verso l\'alto');
+                        movePlayer(0, -1); 
+                        break; // Su
+                    case 1: 
+                        console.log('Movimento verso destra');
+                        movePlayer(1, 0); 
+                        break;  // Destra
+                    case 2: 
+                        console.log('Movimento verso il basso');
+                        movePlayer(0, 1); 
+                        break;  // Giù
+                    case 3: 
+                        console.log('Movimento verso sinistra');
+                        movePlayer(-1, 0); 
+                        break; // Sinistra
+                }
+                break;
+            case "ArrowDown":
+                // Salto di due celle in avanti rispetto alla direzione attuale
+                console.log('Salto in avanti, direzione:', player.direction);
+                switch(player.direction) {
+                    case 0: 
+                        console.log('Salto di due celle verso l\'alto');
+                        movePlayer(0, -2); 
+                        break; // Su
+                    case 1: 
+                        console.log('Salto di due celle verso destra');
+                        movePlayer(2, 0); 
+                        break; // Destra
+                    case 2: 
+                        console.log('Salto di due celle verso il basso');
+                        movePlayer(0, 2); 
+                        break; // Giù
+                    case 3: 
+                        console.log('Salto di due celle verso sinistra');
+                        movePlayer(-2, 0); 
+                        break; // Sinistra
+                }
+                break;
+        }
+    }
 
+    // Funzione per mostrare l'overlay di vittoria/sconfitta
+    function showOverlay(message) {
+        if (gameOverlay) {
+            overlayMessage.textContent = message;
+            gameOverlay.classList.remove('hidden');
+        }
+    }
 
-    function calculateCellSizeAndDraw() {
-        if (!canvas || canvas.width === 0 || canvas.height === 0 || !currentMapData) {
+    // Funzione per muovere il giocatore
+    function movePlayer(dx, dy) {
+        console.log('movePlayer chiamato con dx:', dx, 'dy:', dy);
+        console.log('currentMapData:', currentMapData ? 'presente' : 'mancante');
+        
+        if (gameWon || gameLost || !currentMapData) {
+            console.log('Movimento bloccato:', gameWon ? 'gioco vinto' : gameLost ? 'gioco perso' : 'dati mappa mancanti');
             return;
         }
-        CELL_SIZE = Math.floor(Math.min(canvas.width / currentMapData.cols, canvas.height / currentMapData.rows));
-        CELL_SIZE = Math.max(1, CELL_SIZE); // Assicura CELL_SIZE sia almeno 1
+
+        const newX = player.x + dx;
+        const newY = player.y + dy;
+        console.log('Nuove coordinate calcolate:', newX, newY);
+        console.log('Dimensioni mappa:', currentMapData.cols, 'x', currentMapData.rows);
+
+        // Controllo che la nuova posizione sia all'interno della mappa
+        if (newX < 0 || newX >= currentMapData.cols || newY < 0 || newY >= currentMapData.rows) {
+            console.log('Movimento bloccato: fuori dai limiti della mappa');
+            return; // Fuori dai limiti della mappa
+        }
+
+        // Controllo il tipo di cella su cui si sta spostando il giocatore
+        console.log('Accedo a mapData:', Boolean(currentMapData.mapData));
+        try {
+            const newCell = currentMapData.mapData[newY][newX];
+            console.log('Tipo di cella di destinazione:', newCell);
+            
+            // Se è un muro, blocca il movimento
+            if (newCell === 'wall') {
+                console.log('Movimento bloccato: collisione con un muro');
+                return; // Collisione con un muro
+            }
+            
+            // Aggiorno la posizione del giocatore
+            console.log('Posizione aggiornata da', player.x, player.y, 'a', newX, newY);
+            player.x = newX;
+            player.y = newY;
+            
+            // Controllo vittoria: se il giocatore ha raggiunto il trofeo
+            if (player.x === trophy.x && player.y === trophy.y) {
+                gameWon = true;
+                showOverlay('Hai vinto!');
+                
+                // Rimuovi l'event listener quando il gioco è vinto
+                window.removeEventListener('keydown', handleKeydown);
+            }
+            // Controllo sconfitta: se non è un percorso sicuro, allora fa perdere
+            else if (newCell !== 'path' && newCell !== 'start' && newCell !== 'G') {
+                gameLost = true;
+                showOverlay('Hai perso!');
+                
+                // Rimuovi l'event listener quando il gioco è perso
+                window.removeEventListener('keydown', handleKeydown);
+            }
+        } catch (error) {
+            console.error('Errore nell\'accesso ai dati della mappa:', error);
+            console.log('Dettagli:', {newY, newX, mapData: currentMapData.mapData});
+        }
+
+        // Ridisegno il gioco con la nuova posizione
         drawGame();
     }
 
-    // Esposta per app.js per ridisegnare quando il canvas diventa visibile/ridimensionato
-    function redrawGameCanvas() {
-        calculateCellSizeAndDraw();
+    // Verifica se tutti gli asset sono caricati
+    function checkAllAssetsLoaded() {
+        const allLoaded = Object.values(assets).every(img => img.complete) && playerImg.complete;
+        if (allLoaded && currentMapData) {
+            calculateCellSizeAndDraw();
+        }
+        return allLoaded;
     }
 
+    // Calcola la dimensione delle celle e disegna il gioco
+    function calculateCellSizeAndDraw() {
+        if (!currentMapData) return;
 
-
-    function startGameWithMapData(mapData) {
-        if (!mapData || !mapData.mapData) {
-            console.error("Dati mappa non validi per iniziare il gioco.");
-            alert("Impossibile caricare la mappa selezionata.");
-            // Potrebbe essere utile tornare alla schermata di selezione o al menu
-            if (typeof window.showScreen === 'function') {
-                 // Assumendo che showScreen sia globale o accessibile
-                 // window.showScreen('menu-screen-section'); 
-            }
-            return;
-        }
-        currentMapData = JSON.parse(JSON.stringify(mapData)); // Deep copy per evitare modifiche accidentali
+        // Calcoliamo la dimensione ottimale delle celle in base allo spazio disponibile
+        const maxWidth = canvas.width * 0.95;
+        const maxHeight = canvas.height * 0.95;
         
-        // Sovrascrivi ROWS, COLS con quelle della mappa caricata
-        // Queste costanti globali nel modulo game.js non possono essere riassegnate direttamente
-        // se definite con const/let a livello di modulo. Le useremo tramite currentMapData.
-        // Perciò, CELL_SIZE e il disegno dovranno usare currentMapData.rows e currentMapData.cols
-
-        // Trova la posizione iniziale del giocatore e del trofeo
-        // e inizializza la griglia di gioco (mapGrid)
-        initializeGridAndEntities(); 
-
-        // Resetta stati di gioco
-        gameWon = false;
-        gameLost = false;
-        gameOverlay.classList.add('hidden');
-
-        // Rimuovi la gestione degli eventi in tempo reale
-        window.removeEventListener('keydown', handleKeydown);
-
-        // Pulisci e riattacca listener per i bottoni dell'overlay (se necessario)
-        // Per ora, l'overlay ha solo il messaggio e il bottone di restart.
-        const restartBtn = document.getElementById('restart-game-btn');
-        if (restartBtn) {
-            const newRestartBtn = restartBtn.cloneNode(true);
-            restartBtn.parentNode.replaceChild(newRestartBtn, restartBtn);
-            newRestartBtn.addEventListener('click', () => {
-                if(currentMapData) startGameWithMapData(currentMapData); // Riavvia con la stessa mappa
-            });
-        }
-
-
-        console.log("Gioco avviato con la mappa:", currentMapData.name);
-        calculateCellSizeAndDraw(); // Calcola e disegna la prima volta
+        const cellWidth = Math.floor(maxWidth / currentMapData.cols);
+        const cellHeight = Math.floor(maxHeight / currentMapData.rows);
+        
+        // Prendiamo il valore minore per mantenere celle quadrate
+        CELL_SIZE = Math.min(cellWidth, cellHeight);
+        
+        drawGame();
     }
-
-    function initializeGridAndEntities() {
-        // mapGrid ora sarà currentMapData.mapData
-        // Trova giocatore e trofeo
-        let playerFound = false;
-        let trophyFound = false;
-        for (let r = 0; r < currentMapData.rows; r++) {
-            for (let c = 0; c < currentMapData.cols; c++) {
-                if (currentMapData.mapData[r][c] === 'player') {
-                    player = { x: c, y: r };
-                    playerFound = true;
-                }
-                if (currentMapData.mapData[r][c] === 'trophy') {
-                    trophy = { x: c, y: r };
-                    trophyFound = true;
-                }
-            }
-        }
-        if (!playerFound) {
-            console.warn("Giocatore non trovato nella mappa, lo posiziono in 0,0");
-            player = { x: 0, y: 0 };
-            if(currentMapData.mapData[0][0] === 'wall') currentMapData.mapData[0][0] = 'empty'; // Assicura che non sia un muro
-        }
-        if (!trophyFound) {
-            console.warn("Trofeo non trovato nella mappa, lo posiziono all'opposto del giocatore o in 1,1");
-            trophy = { x: currentMapData.cols -1, y: currentMapData.rows - 1};
-            if(player.x === trophy.x && player.y === trophy.y) trophy = {x:1, y:1};
-            if(currentMapData.mapData[trophy.y][trophy.x] === 'wall') currentMapData.mapData[trophy.y][trophy.x] = 'empty';
-        }
-    }
-
-    function drawGame(){
+    
+    // Funzione per disegnare il gioco
+    function drawGame() {
         if (!ctx || !currentMapData || !currentMapData.mapData || !player) {
             return;
         }
+        
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
+        
+        // Calcolo le dimensioni totali della mappa
+        const mapWidth = currentMapData.cols * CELL_SIZE;
+        const mapHeight = currentMapData.rows * CELL_SIZE;
+        
+        // Calcolo l'offset per centrare la mappa nel canvas
+        const offsetX = Math.floor((canvas.width - mapWidth) / 2);
+        const offsetY = Math.floor((canvas.height - mapHeight) / 2);
+        
+        // Disegno uno sfondo per la mappa
+        ctx.fillStyle = '#2a2a2a';
+        ctx.fillRect(offsetX - 5, offsetY - 5, mapWidth + 10, mapHeight + 10);
+        
         // Disegna la mappa
         for (let r = 0; r < currentMapData.rows; r++) {
             for (let c = 0; c < currentMapData.cols; c++) {
                 const assetKey = currentMapData.mapData[r][c];
+                const x = offsetX + c * CELL_SIZE;
+                const y = offsetY + r * CELL_SIZE;
+                
+                // Se il blocco è di tipo T, W o X, disegna prima il blocco G (Terra) sotto
+                if (['T', 'W', 'X'].includes(assetKey) && assets['G'] && assets['G'].complete) {
+                    ctx.drawImage(assets['G'], x, y, CELL_SIZE, CELL_SIZE);
+                }
+                
+                // Poi disegna il blocco effettivo
                 if (assets[assetKey] && assets[assetKey].complete) {
-                    ctx.drawImage(assets[assetKey], c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-                } else if (assetKey !== 'empty' && assetKey !== 'player' && assetKey !== 'trophy') {
-                    // Fallback se l'asset non è caricato o la chiave non esiste
-                    ctx.fillStyle = 'gray';
-                    ctx.fillRect(c * CELL_SIZE, r * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+                    ctx.drawImage(assets[assetKey], x, y, CELL_SIZE, CELL_SIZE);
+                } else {
+                    // Fallback se l'asset non è disponibile
+                    ctx.fillStyle = '#777777';
+                    ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
                 }
             }
         }
 
-        // Disegna il giocatore
-        if (playerImg.complete) {
-            ctx.drawImage(playerImg, player.x * CELL_SIZE, player.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-        }
-
-        // Disegna il trofeo (se non è stato 'raccolto' dal giocatore)
-        if (currentMapData.mapData[trophy.y][trophy.x] === 'trophy' && assets.trophy.complete) {
-             ctx.drawImage(assets.trophy, trophy.x * CELL_SIZE, trophy.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
-        }
-
-        if (gameWon) {
-            showOverlayMessage("Hai Vinto!");
-        } else if (gameLost) {
-            showOverlayMessage("Hai Perso!");
-        }
-    }
-
-    
-
-    
-
-
-    function movePlayer() {
-        if (gameWon || gameLost) return;
-
-        let newX = player.x;
-        let newY = player.y;
-
-        // Calcola la nuova posizione basata sulla direzione
-        // dir: 0=su, 1=dx, 2=giu, 3=sx
-        if (player.dir === 0) newY -= 1; // Su
-        else if (player.dir === 1) newX += 1; // Destra
-        else if (player.dir === 2) newY += 1; // Giù
-        else if (player.dir === 3) newX -= 1; // Sinistra
-
-        // Controllo dei limiti della mappa
-        if (newX < 0 || newX >= currentMapData.cols || newY < 0 || newY >= currentMapData.rows) {
-            return; // Movimento fuori mappa non permesso
-        }
-
-        const targetCell = currentMapData.mapData[newY][newX];
-
-        // Controllo collisioni con ostacoli
-        if (targetCell === 'wall' || targetCell === 'tree' || targetCell === 'water') {
-            gameLost = true;
-            calculateCellSizeAndDraw();
-            return;
-        }
-
-        // Aggiorna la mappa (la vecchia cella del giocatore diventa 'empty')
-        currentMapData.mapData[player.y][player.x] = 'empty';
-        player.x = newX;
-        player.y = newY;
-        // Non rimettiamo 'player' nella mappa, lo disegniamo sopra
-
-        // Controllo vittoria
-        if (player.x === trophy.x && player.y === trophy.y) {
-            gameWon = true;
-            // Rimuovi il trofeo dalla mappa logica se vuoi che scompaia
-            // currentMapData.mapData[trophy.y][trophy.x] = 'empty'; 
-        }
-        calculateCellSizeAndDraw(); // Ridisegna dopo ogni mossa valida
-    }
-
-    function showOverlayMessage(message) {
-        if(overlayMessage) overlayMessage.textContent = message;
-        if(gameOverlay) gameOverlay.classList.remove('hidden');
-        // Nascondi i controlli di gioco quando l'overlay è mostrato
-        const playControls = document.getElementById('play-controls');
-        if(playControls) playControls.classList.add('hidden');
-    }
-
-    // Gestione caricamento assets (semplificata, il disegno avviene on-demand)
-    let allAssetsLoaded = false;
-    const totalAssetImages = window.assetList.length + 1; // +1 per playerImg
-    let loadedAssetImages = 0;
-
-    function checkAllAssetsLoaded() {
-        loadedAssetImages++;
-        if (loadedAssetImages >= totalAssetImages) {
-            allAssetsLoaded = true;
-            console.log("Tutti gli asset grafici caricati.");
-            // Se c'è una mappa corrente e il gioco è in attesa di disegno, ridisegna.
-            if (currentMapData && (gameWon || gameLost || !gameOverlay.classList.contains('hidden') )) {
-                 // Non ridisegnare automaticamente qui a meno che non sia strettamente necessario
-                 // Il primo disegno avviene con calculateCellSizeAndDraw() in startGameWithMapData
+        // Disegna il trofeo se l'immagine è caricata
+        if (trophy) {
+            // In assetList, il trofeo è associato alla chiave 'X'
+            const trophyImg = assets['X'];
+            if (trophyImg && trophyImg.complete) {
+                ctx.drawImage(
+                    trophyImg,
+                    offsetX + trophy.x * CELL_SIZE,
+                    offsetY + trophy.y * CELL_SIZE,
+                    CELL_SIZE,
+                    CELL_SIZE
+                );
             }
+            // Nessun fallback - se l'immagine non è caricata, non mostriamo nulla
         }
-    }
 
-    window.assetList.forEach(a => {
-        if (assets[a.key]) { // Verifica che l'asset esista prima di assegnare onload
-            assets[a.key].onload = checkAllAssetsLoaded;
-            assets[a.key].onerror = () => { 
-                console.error(`Errore caricamento asset: ${a.key}`); 
-                checkAllAssetsLoaded(); // Conta anche gli errori per non bloccare
-            };
+        // Disegna il giocatore con rotazione in base alla direzione
+        if (playerImg && playerImg.complete) {
+            // Salviamo lo stato attuale del canvas
+            ctx.save();
+            
+            // Calcoliamo il centro della cella del giocatore
+            const centerX = offsetX + player.x * CELL_SIZE + CELL_SIZE / 2;
+            const centerY = offsetY + player.y * CELL_SIZE + CELL_SIZE / 2;
+            
+            // Spostiamo l'origine al centro della cella per poter ruotare
+            ctx.translate(centerX, centerY);
+            
+            // Ruotiamo in base alla direzione (0=su, 1=destra, 2=giù, 3=sinistra)
+            const rotation = player.direction * 90 * Math.PI / 180;
+            ctx.rotate(rotation);
+            
+            // Disegniamo l'immagine centrata attorno all'origine
+            ctx.drawImage(
+                playerImg,
+                -CELL_SIZE / 2,  // x negativo perché ora stiamo disegnando attorno al centro
+                -CELL_SIZE / 2,  // y negativo perché ora stiamo disegnando attorno al centro
+                CELL_SIZE,
+                CELL_SIZE
+            );
+            
+            // Ripristiniamo lo stato precedente del canvas
+            ctx.restore();
         } else {
-            console.warn(`Asset key '${a.key}' definito in assetList ma non trovato in assets object.`);
-            checkAllAssetsLoaded(); // Consideralo 'caricato' per non bloccare il conteggio
+            // Fallback se l'immagine del player non è disponibile
+            ctx.fillStyle = 'red';
+            ctx.fillRect(
+                offsetX + player.x * CELL_SIZE + CELL_SIZE * 0.2,
+                offsetY + player.y * CELL_SIZE + CELL_SIZE * 0.2,
+                CELL_SIZE * 0.6,
+                CELL_SIZE * 0.6
+            );
         }
-    });
-    playerImg.onload = checkAllAssetsLoaded;
-    playerImg.onerror = () => { console.error('Errore caricamento immagine giocatore'); checkAllAssetsLoaded(); };
-
-    // Se per qualche motivo non ci sono immagini (improbabile)
-    if (totalAssetImages === 0) {
-        allAssetsLoaded = true;
     }
 
-    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
-
-    function addCommandToQueue(command) {
-        if (isSequenceRunning) return;
-        commandQueue.push(command);
-        updateCommandListUI();
-    }
-
-    function clearCommandQueue() {
-        if (isSequenceRunning) return;
-        commandQueue = [];
-        updateCommandListUI();
-    }
-
-    function updateCommandListUI() {
-        const listContainer = document.getElementById('command-sequence-list');
-        listContainer.innerHTML = '';
-        if (commandQueue.length === 0) {
-            listContainer.innerHTML = '<p>Aggiungi comandi...</p>';
+    // Inizializza il gioco con i dati della mappa
+    function startGameWithMapData(mapData) {
+        if (!mapData || !mapData.mapData) {
+            console.error("Dati della mappa non validi");
             return;
         }
-        commandQueue.forEach(cmd => {
-            const commandItem = document.createElement('div');
-            commandItem.className = 'command-item';
-            commandItem.textContent = cmd.charAt(0).toUpperCase() + cmd.slice(1);
-            listContainer.appendChild(commandItem);
-        });
-    }
 
-    async function runCommandQueue() {
-        if (isSequenceRunning || commandQueue.length === 0) return;
-
-        isSequenceRunning = true;
-        toggleCommandButtons(false); // Disabilita i pulsanti
-
-        for (const command of commandQueue) {
-            if (gameWon || gameLost) break; // Interrompi se il gioco è finito
-            // La logica di movimento è già in handleCommand, che chiama movePlayer, che chiama drawGame
-            if (command === 'avanti') {
-                movePlayer();
-            } else if (command === 'destra') {
-                player.dir = (player.dir + 1) % 4;
-                drawGame();
-            } else if (command === 'sinistra') {
-                player.dir = (player.dir + 3) % 4;
-                drawGame();
-            }
-            await sleep(500); // Pausa di 500ms tra i comandi
+        // Reset dello stato di gioco
+        currentMapData = mapData;
+        gameWon = false;
+        gameLost = false;
+        
+        // Nascondi l'overlay
+        if (gameOverlay) {
+            gameOverlay.classList.add('hidden');
         }
 
-        isSequenceRunning = false;
-        toggleCommandButtons(true); // Riabilita i pulsanti
-    }
-
-    function toggleCommandButtons(enabled) {
-        document.querySelectorAll('#command-panel button').forEach(btn => {
-            // Non disabilitare il tasto "Torna al Menu"
-            if (btn.id !== 'back-menu-from-game') {
-                btn.disabled = !enabled;
-            }
-        });
-    }
-
-    function initializeCommandPanel() {
-        const commandButtons = document.querySelectorAll('.command-buttons button[data-cmd]');
-        commandButtons.forEach(button => {
-            const newButton = button.cloneNode(true);
-            button.parentNode.replaceChild(newButton, button);
-            newButton.addEventListener('click', () => addCommandToQueue(newButton.dataset.cmd));
-        });
-
-        const runBtn = document.getElementById('run-sequence');
-        const newRunBtn = runBtn.cloneNode(true);
-        runBtn.parentNode.replaceChild(newRunBtn, runBtn);
-        newRunBtn.addEventListener('click', runCommandQueue);
-
-        const clearBtn = document.getElementById('clear-sequence');
-        const newClearBtn = clearBtn.cloneNode(true);
-        clearBtn.parentNode.replaceChild(newClearBtn, clearBtn);
-        newClearBtn.addEventListener('click', clearCommandQueue);
+        // Posiziona il giocatore in basso a destra, imposta direzione iniziale (0 = su) e cerca il trofeo nella mappa
+        player = { x: mapData.cols - 1, y: mapData.rows - 1, direction: 0 };
         
-        clearCommandQueue();
-        toggleCommandButtons(true);
+        // Cerca il trofeo nella mappa (identificato dalla chiave 'X')
+        for (let r = 0; r < mapData.rows; r++) {
+            for (let c = 0; c < mapData.cols; c++) {
+                if (mapData.mapData[r][c] === 'X') {
+                    trophy = { x: c, y: r };
+                    console.log('Trofeo trovato in posizione:', c, r);
+                }
+            }
+        }
+
+        // Avvia il controllo con le frecce
+        window.addEventListener('keydown', handleKeydown);
+        
+        // Preparazione bottone per ricominciare
+        if (restartGameBtn) {
+            restartGameBtn.addEventListener('click', () => {
+                startGameWithMapData(currentMapData);
+            });
+        }
+        
+        // Bottone torna al menu
+        if (backMenuButton) {
+            backMenuButton.addEventListener('click', () => {
+                window.removeEventListener('keydown', handleKeydown);
+            });
+        }
+
+        // Aggiorna la dimensione delle celle e disegna
+        calculateCellSizeAndDraw();
+        
+        // Monitora il caricamento degli asset
+        const checkAssetInterval = setInterval(() => {
+            if (checkAllAssetsLoaded()) {
+                clearInterval(checkAssetInterval);
+                drawGame();
+            }
+        }, 100);
+
+        return true;
     }
 
-    // Espone le funzioni necessarie
+    // Reset del canvas quando la finestra è ridimensionata
+    function updateCanvasResolution() {
+        if (canvas && canvas.parentElement) {
+            canvas.width = canvas.parentElement.clientWidth;
+            canvas.height = canvas.parentElement.clientHeight;
+            if (currentMapData) {
+                calculateCellSizeAndDraw();
+            }
+        }
+    }
+
+    // Espongo pubblicamente le funzioni necessarie
     return {
         startGameWithMapData,
-        redrawGameCanvas, // Esposta per app.js
-        initializeCommandPanel
+        updateCanvasResolution,
+        drawGame
     };
 })();

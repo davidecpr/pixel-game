@@ -2,14 +2,14 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft‐style Map Game</title>
+    <title>Pixel Game</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <!-- Menu iniziale -->
 <section id="menu-screen-section">
   <div id="menu-screen">
-    <h1>Minecraft Map Game</h1>
+    <h1>Pixel Game</h1>
       <nav>
       <button id="btn-editor" class="btn btn-primary">Apri Configuratore</button>
       <button id="btn-play" class="btn btn-primary">Gioca</button>
@@ -52,26 +52,13 @@
         <div id="game-area">
             <canvas id="game-canvas"></canvas>
             <div id="game-overlay" class="hidden">
-                <p id="overlay-message"></p>
-                <button id="restart-game-btn" class="btn">Ricomincia</button>
+                <div id="overlay-message"></div>
+                <button id="restart-game-btn" class="btn btn-primary">Rigioca</button>
             </div>
-        </div>
-        <div id="command-panel">
-            <h2>Comandi</h2>
-            <div id="command-sequence-list">
-                <!-- La sequenza di comandi apparirà qui -->
+            <div id="game-controls-info">
+                <p>Usa le frecce ⬆️ ⬇️ ⬅️ ➡️ per muovere il personaggio</p>
+                <button id="back-menu-from-game" class="btn btn-secondary">Torna al Menu</button>
             </div>
-            <div class="command-buttons">
-                <button data-cmd="avanti" class="btn">Avanti</button>
-                <button data-cmd="sinistra" class="btn">Gira Sinistra</button>
-                <button data-cmd="destra" class="btn">Gira Destra</button>
-            </div>
-            <hr>
-            <div class="execution-buttons">
-                <button id="run-sequence" class="btn btn-primary">Esegui</button>
-                <button id="clear-sequence" class="btn btn-secondary">Pulisci</button>
-            </div>
-            <button id="back-menu-from-game" class="btn btn-secondary">Torna al Menu</button>
         </div>
     </div>
 </section>
@@ -79,10 +66,10 @@
 <!-- Definizione assetList condivisa -->
 <script>
     window.assetList = [
-        { key: 'G', name: 'Prato',  url: 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.6/assets/minecraft/textures/block/green_concrete_powder.png' },
-        { key: 'T', name: 'Albero', url: 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.6/assets/minecraft/textures/block/azalea_plant.png' },
-        { key: 'W', name: 'Acqua',  url: 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.6/assets/minecraft/textures/block/warped_wart_block.png' },
-        { key: 'X', name: 'Trofeo', url: 'https://raw.githubusercontent.com/CodeMouse92/no-monster-minecraft/main/img/nether_star.png' }
+        { key: 'G', name: 'Terra',  url: 'https://i.pinimg.com/564x/2a/b1/c3/2ab1c37cfdff720c6de2ddb07328f145.jpg' },
+        { key: 'T', name: 'Albero', url: 'https://minecraft.wiki/images/Oak_Sapling_JE14.png?c2c3b' },
+        { key: 'W', name: 'Acqua',  url: 'https://i.pinimg.com/474x/96/f8/f0/96f8f0cbf153ba33732c84b18a385cb4.jpg' },
+        { key: 'X', name: 'Trofeo', url: 'https://p.novaskin.me/5444504173.png' }
     ];
 </script>
 

@@ -1,6 +1,6 @@
 // js/editor.js
 (() => {
-    const ROWS = 20, COLS = 20;
+    const ROWS = 5, COLS = 5;
     let CELL = 40; // Dimensione iniziale, sarà ricalcolata
     const canvas = document.getElementById('editor-canvas');
     const ctx    = canvas.getContext('2d');

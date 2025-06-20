@@ -254,80 +254,54 @@ h2 {
 /* Fine Play Screen - Map Selection */
 
 /* Play Screen - Layout di Gioco */
-#play-screen {
+#play-screen-section {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  /* Calcola l'altezza tenendo conto del padding 2rem sopra/sotto del genitore section */
-  height: calc(100vh - 4rem);
-  align-items: stretch; /* Allunga i figli per tutta l'altezza */
-  justify-content: flex-start;
-  padding: 0;
+  flex-direction: column;
   background-color: #3a3a3a;
 }
 
-#game-area {
-  flex-grow: 1; /* Occupa tutto lo spazio possibile */
+#play-screen {
+  flex: 1;
+  position: relative;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  position: relative; /* Necessario per posizionare l'overlay */
+  overflow: hidden;
+}
+
+#game-area {
+  flex: 1;
+  position: relative;
+  width: 100%; 
+  height: 100%;
+  background-color: #2a2a2a;
 }
 
 #game-canvas {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain; /* Mantiene le proporzioni del canvas */
-  box-shadow: 0 0 20px rgba(0,0,0,0.5);
-  border: 5px solid #2a2a2a;
-}
-
-#command-panel {
-  width: 300px; /* Larghezza fissa per il pannello comandi */
-  flex-shrink: 0; /* Impedisce al pannello di restringersi */
-  background-color: #555555;
-  border-left: 5px solid #2a2a2a;
-  padding: 1.5rem;
-  color: #ffffff;
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-#command-panel h2 {
-  color: #ffffff;
-  text-align: center;
-  text-shadow: 2px 2px 0px #2a2a2a;
-}
-
-#command-sequence-list {
-  flex-grow: 1; /* Occupa lo spazio disponibile */
-  background-color: #4a4a4a;
-  border: 3px solid #2a2a2a;
-  padding: 0.5rem;
-  min-height: 150px; /* Altezza minima */
-  overflow-y: auto;
-}
-
-.command-item {
-  background-color: #777777;
-  color: #ffffff;
-  padding: 0.5em;
-  margin-bottom: 0.5em;
-  border: 1px solid #333333;
-  border-radius: 0;
-  text-align: center;
-}
-
-.command-buttons, .execution-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-#command-panel .btn {
+  display: block;
+  image-rendering: pixelated;
   width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+#game-controls-info {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
 }
 
 #game-overlay {

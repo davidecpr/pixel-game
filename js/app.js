@@ -130,16 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
     btnStartGame.addEventListener('click', () => {
         if (selectedMapData) {
             mapSelectionContainer.classList.add('hidden');
-            playScreen.classList.remove('hidden'); // Mostra l'area di gioco e il pannello comandi
+            playScreen.classList.remove('hidden'); // Mostra l'area di gioco
             
             if (typeof game !== 'undefined' && game.startGameWithMapData) {
                 game.startGameWithMapData(selectedMapData);
-                // Inizializza il pannello dei comandi dopo aver avviato il gioco
-                if (game.initializeCommandPanel) {
-                    game.initializeCommandPanel();
-                } else {
-                    console.error('Funzione game.initializeCommandPanel non trovata.');
-                }
             } else {
                 console.error('Funzione game.startGameWithMapData non trovata.');
                 alert('Errore nell\'avviare il gioco. Controlla la console.');
