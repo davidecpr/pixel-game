@@ -2,14 +2,15 @@
 <html lang="it">
 <head>
     <meta charset="UTF-8">
-    <title>Minecraft‐style Map Game</title>
+    <title>Pixel Game</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 <!-- Menu iniziale -->
 <section id="menu-screen-section">
   <div id="menu-screen">
-    <h1>Minecraft Map Game</h1>
+    <h1>Pixel Game</h1>
       <nav>
       <button id="btn-editor" class="btn btn-primary">Apri Configuratore</button>
       <button id="btn-play" class="btn btn-primary">Gioca</button>
@@ -34,9 +35,8 @@
   </div>
 </section>
 
-<!-- Play -->
-<section id="play-screen-section" class="hidden">
-    <!-- Contenitore per selezione mappa (rimane invariato ma ora è separato dal play-screen) -->
+<!-- Play (Selezione Mappa) -->
+<section id="map-selection-section" class="hidden">
     <div id="map-selection-container">
       <h2>Scegli una Mappa</h2>
       <div id="map-list-container">
@@ -46,32 +46,50 @@
       <button id="btn-start-game" class="btn btn-primary" disabled>Avvia Gioco</button>
       <button id="back-menu-2" class="btn btn-secondary">Torna al Menu</button>
     </div>
+</section>
 
-    <!-- Nuovo contenitore per la schermata di gioco -->
-    <div id="play-screen" class="hidden">
-        <div id="game-area">
-            <canvas id="game-canvas"></canvas>
-            <div id="game-overlay" class="hidden">
-                <p id="overlay-message"></p>
-                <button id="restart-game-btn" class="btn">Ricomincia</button>
+<!-- Command (Inserimento Sequenza) -->
+<section id="command-screen-section" class="hidden">
+    <div id="command-container">
+        <h2>Crea Sequenza Comandi</h2>
+        <div id="command-panel">
+            <div id="keyboard-legend" style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
+                <h3>Usa la tastiera</h3>
+                <div id="command-legend" class="legend" style="display: flex; align-items: center; justify-items: center;">
+                    <div class="legend-grid">
+                      <span class="legend-block command-forward">Avanti</span>
+                      <span class="legend-block command-right">Destra</span>
+                      <span class="legend-block command-left">Sinistra</span>
+                      <span class="legend-block command-jump">Salto</span>
+                    </div>
+                  </div>
+            </div>
+            <div id="command-sequence">
+                <h3>Sequenza</h3>
+                <div id="command-list"></div>
+            </div>
+            <div id="control-buttons">
+                <button id="btn-execute" class="btn btn-primary">Esegui Sequenza</button>
+                <button id="btn-clear" class="btn btn-secondary">Pulisci</button>
             </div>
         </div>
-        <div id="command-panel">
-            <h2>Comandi</h2>
-            <div id="command-sequence-list">
-                <!-- La sequenza di comandi apparirà qui -->
+        <button id="back-to-map-selection" class="btn btn-secondary">Indietro</button>
+    </div>
+</section>
+
+<!-- Play (Esecuzione Gioco) -->
+<section id="play-screen-section" class="hidden">
+    <div id="play-screen">
+        <div id="game-area">
+            <canvas id="game-canvas"></canvas>
+            <div id="countdown-overlay" class="hidden">
+                <div id="countdown">3</div>
             </div>
-            <div class="command-buttons">
-                <button data-cmd="avanti" class="btn">Avanti</button>
-                <button data-cmd="sinistra" class="btn">Gira Sinistra</button>
-                <button data-cmd="destra" class="btn">Gira Destra</button>
+            <div id="game-overlay" class="hidden">
+                <div id="overlay-message"></div>
+                <button id="restart-game-btn" onclick="backToCommandScreen()" class="btn btn-primary">Rigioca</button>
+                <button id="back-menu-from-game" class="btn btn-secondary">Torna al Menu</button>
             </div>
-            <hr>
-            <div class="execution-buttons">
-                <button id="run-sequence" class="btn btn-primary">Esegui</button>
-                <button id="clear-sequence" class="btn btn-secondary">Pulisci</button>
-            </div>
-            <button id="back-menu-from-game" class="btn btn-secondary">Torna al Menu</button>
         </div>
     </div>
 </section>
@@ -79,10 +97,10 @@
 <!-- Definizione assetList condivisa -->
 <script>
     window.assetList = [
-        { key: 'G', name: 'Prato',  url: 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.6/assets/minecraft/textures/block/green_concrete_powder.png' },
-        { key: 'T', name: 'Albero', url: 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.6/assets/minecraft/textures/block/azalea_plant.png' },
-        { key: 'W', name: 'Acqua',  url: 'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.21.6/assets/minecraft/textures/block/warped_wart_block.png' },
-        { key: 'X', name: 'Trofeo', url: 'https://raw.githubusercontent.com/CodeMouse92/no-monster-minecraft/main/img/nether_star.png' }
+        { key: 'G', name: 'Terra',  url: 'https://i.pinimg.com/564x/2a/b1/c3/2ab1c37cfdff720c6de2ddb07328f145.jpg' },
+        { key: 'T', name: 'Albero', url: 'https://minecraft.wiki/images/Oak_Sapling_JE14.png?c2c3b' },
+        { key: 'W', name: 'Acqua',  url: 'https://i.pinimg.com/474x/96/f8/f0/96f8f0cbf153ba33732c84b18a385cb4.jpg' },
+        { key: 'X', name: 'Trofeo', url: 'https://p.novaskin.me/5444504173.png' }
     ];
 </script>
 

@@ -1,7 +1,7 @@
 {
   "name": "pixel-game",
   "version": "1.0.0",
-  "description": "Minecraft-style pixel art game with map editor",
+  "description": "Pixel art game with map editor",
   "main": "index.js",
   "scripts": {
     
