@@ -1,15 +1,8 @@
 {
-  "name": "mappa",
-  "rows": 5,
+  "name": "esempio1",
+  "rows": 4,
   "cols": 5,
   "mapData": [
-    [
-      "G",
-      "G",
-      "G",
-      "G",
-      "G"
-    ],
     [
       "G",
       "G",

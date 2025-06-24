@@ -2,6 +2,7 @@
 
 /* Reset base e stili globali */
 html, body {
+  padding: 20px;
   margin: 0;
   padding: 0;
   font-family: 'Press Start 2P', sans-serif; /* Applica il font di default se vuoi un look pixelato ovunque */
@@ -33,7 +34,7 @@ h1 {
 h2 {
   font-size: 1.8em;
   margin-bottom: 0.5em;
-  color: #444;
+  color: #fff;
 }
 
 /* Stili per i bottoni */
@@ -253,7 +254,9 @@ h2 {
 }
 /* Fine Play Screen - Map Selection */
 
-/* Play Screen - Layout di Gioco */
+/* Play Screen Styles - Comuni a tutte le schermate di gioco */
+#map-selection-section,
+#command-screen-section,
 #play-screen-section {
   position: fixed;
   top: 0;
@@ -263,21 +266,71 @@ h2 {
   display: flex;
   flex-direction: column;
   background-color: #3a3a3a;
+  align-items: stretch;
+  justify-content: stretch;
 }
 
+/* Stili per il countdown */
+#countdown-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+#countdown {
+  font-size: 8rem;
+  font-weight: bold;
+  color: white;
+  text-shadow: 0 0 20px #ff9000, 0 0 40px #ff6000;
+  animation: pulse 1s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.2); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+#game-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+/* Stili per la schermata principale di gioco (solo canvas) */
 #play-screen {
-  flex: 1;
+  width: 100%;
+  height: 100%;
   position: relative;
   display: flex;
+  flex-direction: column;
   overflow: hidden;
 }
 
 #game-area {
-  flex: 1;
   position: relative;
-  width: 100%; 
-  height: 100%;
+  flex: 1;
   background-color: #2a2a2a;
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 #game-canvas {
@@ -288,21 +341,222 @@ h2 {
   object-fit: contain;
 }
 
-#game-controls-info {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  background-color: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 10px 15px;
-  border-radius: 5px;
-  text-align: left;
+/* Stili per il pannello comandi */
+#command-panel {
+  background-color: #555555;
+  padding: 1.5rem;
+  color: #ffffff;
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  align-items: flex-start;
-  max-width: 180px;
+  gap: 1.2rem;
+  width: 100%;
+}
+
+/* Stili per la leggenda dei tasti */
+#keyboard-legend {
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+#keyboard-legend h3 {
+  margin-bottom: 0.8rem;
+  color: #ffffff;
+  font-size: 1.2rem;
+}
+
+.key-legend-container {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.key-legend {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.key {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 50px;
+  height: 50px;
+  padding: 0 10px;
+  background-color: #444;
+  color: white;
+  border-radius: 4px;
+  box-shadow: 0 4px 0 #222, 0 6px 8px rgba(0, 0, 0, 0.4);
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.key-desc {
+  font-size: 0.9rem;
+  color: #ddd;
+}
+
+#command-sequence {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+#command-list {
+  background-color: rgba(0,0,0,0.2);
+  padding: 15px;
+  border-radius: 5px;
+  min-height: 150px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+
+.command-item {
+  background-color: #444;
+  margin: 8px 0;
+  padding: 8px 15px;
+  border-radius: 4px;
+  border-left: 4px solid #93c5fd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1rem;
+}
+
+.command-remove {
+  background: none;
+  border: none;
+  color: #ff7070;
+  cursor: pointer;
+  font-size: 1.2em;
+}
+
+#control-buttons {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+  justify-content: center;
+  width: 100%;
+}
+
+#back-to-map-selection {
+  margin-top: 1rem;
+}
+
+#command-panel h3 {
+  text-align: center;
+  margin: 0 0 0.5rem 0;
+  color: #ffffff;
+  font-size: 1.3em;
+}
+
+#command-panel h4 {
+  margin: 0.5rem 0;
+  color: #ffffff;
+  font-size: 1.1em;
+}
+
+#command-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+.btn-command {
+  background-color: #777777;
+  color: #ffffff;
+  border: 2px solid #333333;
+  padding: 0.6rem 0.5rem;
   font-size: 0.9em;
+  transition: background-color 0.1s ease-out, transform 0.1s ease-out, box-shadow 0.1s ease-out;
+  box-shadow: 2px 2px 0px #333333;
+}
+
+.btn-command:hover {
+  background-color: #888888;
+}
+
+.btn-command:active {
+  background-color: #666666;
+  box-shadow: 1px 1px 0px #333333;
+  transform: translate(1px, 1px);
+}
+
+#command-sequence {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+#command-list {
+  flex-grow: 1;
+  background-color: #444444;
+  border: 3px solid #2a2a2a;
+  padding: 0.5rem;
+  overflow-y: auto;
+  margin-bottom: 0.5rem;
+  min-height: 150px;
+  max-height: 300px;
+}
+
+.command-item {
+  background-color: #666666;
+  color: #ffffff;
+  padding: 0.4rem 0.6rem;
+  margin-bottom: 0.3rem;
+  border: 1px solid #333333;
+  display: flex;
+  align-items: center;
+}
+
+.command-number {
+  background-color: #2a2a2a;
+  color: #ffffff;
+  border-radius: 50%;
+  width: 1.5rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+  font-size: 0.8em;
+}
+
+.command-icon {
+  margin-right: 0.5rem;
+  font-size: 1.2em;
+}
+
+.command-empty {
+  color: #aaaaaa;
+  text-align: center;
+  padding: 1rem 0;
+  font-style: italic;
+  font-size: 0.9em;
+}
+
+#control-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+#control-buttons button {
+  flex: 1;
+}
+
+#back-menu-from-game {
+  width: 100%;
+}
+
+.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 #game-overlay {
@@ -375,13 +629,17 @@ h2 {
 
 /* Stili per i canvas */
 canvas {
-  border: 1px solid #d1d5db; /* gray-300 */
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   image-rendering: -moz-crisp-edges;
   image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated;
   image-rendering: crisp-edges;
   background-color: white;
+}
+
+/* Stile per il canvas di gioco a schermo intero */
+#game-canvas {
+  border: none;
+  box-shadow: none;
 }
 
 /* Layout delle schermate */
@@ -478,4 +736,95 @@ section { /* Stile per #menu-screen-section, #editor-screen-section, #play-scree
   padding: 0.5rem 1rem;
   border-radius: 0.375rem;
   font-weight: 500;
+}
+
+.command-item {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  margin: 6px;
+  border-radius: 12px;
+  font-weight: bold;
+  color: white;
+  font-size: 14px;
+  gap: 8px;
+  position: relative;
+}
+
+.command-forward { background-color: #4CAF50; }   /* verde */
+.command-right   { background-color: #FFC107; }   /* giallo */
+.command-left    { background-color: #FF9800; }   /* arancio */
+.command-jump    { background-color: #F44336; }   /* rosso */
+
+.command-item .remove-btn {
+  background: transparent;
+  border: none;
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  margin-left: 4px;
+  line-height: 1;
+}
+
+
+.legend {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 13px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.legend {
+  margin-bottom: 20px;
+}
+
+.legend-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: start;
+  padding-top: 10px;
+}
+
+.legend-block {
+  display: inline-block;
+  font-family: 'Press Start 2P', monospace;
+  padding: 20px 26px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+  min-width: 100px;
+  box-shadow: 2px 2px 0 #222;
+}
+
+/* Colori coerenti con quelli usati nei blocchi comando */
+.command-forward  { background-color: #2ecc71; text-transform: uppercase; } /* Verde */
+.command-right    { background-color: #f1c40f; text-transform: uppercase;} /* Giallo */
+.command-left     { background-color: #e67e22; text-transform: uppercase;} /* Arancio */
+.command-jump     { background-color: #e74c3c; text-transform: uppercase;} /* Rosso */
+
+.command-name {
+  text-transform: uppercase;
+}
+
+.confetti-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1001; /* più alto del contenuto dell'overlay */
 }

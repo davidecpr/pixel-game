@@ -1,6 +1,6 @@
 {
-  "name": "test3",
-  "rows": 5,
+  "name": "esempio",
+  "rows": 4,
   "cols": 5,
   "mapData": [
     [
@@ -20,16 +20,9 @@
     [
       "G",
       "G",
-      "X",
+      "G",
       "G",
       "G"
-    ],
-    [
-      "T",
-      "G",
-      "T",
-      "W",
-      "T"
     ],
     [
       "G",

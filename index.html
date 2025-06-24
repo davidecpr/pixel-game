@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Pixel Game</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
 <body>
 <!-- Menu iniziale -->
@@ -34,9 +35,8 @@
   </div>
 </section>
 
-<!-- Play -->
-<section id="play-screen-section" class="hidden">
-    <!-- Contenitore per selezione mappa (rimane invariato ma ora è separato dal play-screen) -->
+<!-- Play (Selezione Mappa) -->
+<section id="map-selection-section" class="hidden">
     <div id="map-selection-container">
       <h2>Scegli una Mappa</h2>
       <div id="map-list-container">
@@ -46,17 +46,48 @@
       <button id="btn-start-game" class="btn btn-primary" disabled>Avvia Gioco</button>
       <button id="back-menu-2" class="btn btn-secondary">Torna al Menu</button>
     </div>
+</section>
 
-    <!-- Nuovo contenitore per la schermata di gioco -->
-    <div id="play-screen" class="hidden">
+<!-- Command (Inserimento Sequenza) -->
+<section id="command-screen-section" class="hidden">
+    <div id="command-container">
+        <h2>Crea Sequenza Comandi</h2>
+        <div id="command-panel">
+            <div id="keyboard-legend" style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
+                <h3>Usa la tastiera</h3>
+                <div id="command-legend" class="legend" style="display: flex; align-items: center; justify-items: center;">
+                    <div class="legend-grid">
+                      <span class="legend-block command-forward">Avanti</span>
+                      <span class="legend-block command-right">Destra</span>
+                      <span class="legend-block command-left">Sinistra</span>
+                      <span class="legend-block command-jump">Salto</span>
+                    </div>
+                  </div>
+            </div>
+            <div id="command-sequence">
+                <h3>Sequenza</h3>
+                <div id="command-list"></div>
+            </div>
+            <div id="control-buttons">
+                <button id="btn-execute" class="btn btn-primary">Esegui Sequenza</button>
+                <button id="btn-clear" class="btn btn-secondary">Pulisci</button>
+            </div>
+        </div>
+        <button id="back-to-map-selection" class="btn btn-secondary">Indietro</button>
+    </div>
+</section>
+
+<!-- Play (Esecuzione Gioco) -->
+<section id="play-screen-section" class="hidden">
+    <div id="play-screen">
         <div id="game-area">
             <canvas id="game-canvas"></canvas>
+            <div id="countdown-overlay" class="hidden">
+                <div id="countdown">3</div>
+            </div>
             <div id="game-overlay" class="hidden">
                 <div id="overlay-message"></div>
-                <button id="restart-game-btn" class="btn btn-primary">Rigioca</button>
-            </div>
-            <div id="game-controls-info">
-                <p>Usa le frecce ⬆️ ⬇️ ⬅️ ➡️ per muovere il personaggio</p>
+                <button id="restart-game-btn" onclick="backToCommandScreen()" class="btn btn-primary">Rigioca</button>
                 <button id="back-menu-from-game" class="btn btn-secondary">Torna al Menu</button>
             </div>
         </div>
